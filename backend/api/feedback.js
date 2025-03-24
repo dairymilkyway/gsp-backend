@@ -15,12 +15,12 @@ module.exports = async (req, res) => {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
-      // Extract name, rating, and comment from the request body
-      const { name, rating, comment } = req.body;
+      // Extract rating and comment from the request body
+      const { rating, comment } = req.body;
 
-      // Create new feedback with provided name or default to "Anonymous"
+      // Create new feedback with the user's name
       const feedback = new FeedbackModel({
-        name: name || "Anonymous", // Default to Anonymous if name is not provided
+        name: req.user.name, // Use the authenticated user's name
         rating,
         comment,
       });
@@ -39,8 +39,8 @@ module.exports = async (req, res) => {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
-      // Fetch all feedbacks (or filter by user if needed)
-      const feedbacks = await FeedbackModel.find();
+      // Fetch feedbacks submitted by the logged-in user
+      const feedbacks = await FeedbackModel.find({ name: req.user.name });
       return res.status(200).json(feedbacks);
     }
 
