@@ -1,35 +1,24 @@
 const FeedbackModel = require("../model/Feedback");
 const connectToDatabase = require("../db");
+const { verifyToken } = require("../middleware/auth");
 
 module.exports = async (req, res) => {
   await connectToDatabase();
 
-  try {
-    // POST - Submit Feedback
-    if (req.method === "POST") {
+  if (req.method === "POST") {
+    await verifyToken(req, res, async () => {
       const { name, rating, comment } = req.body;
-
-      // Create feedback with name (default to "Anonymous" if not provided)
-      const feedback = new FeedbackModel({
-        name: name || "Anonymous",
-        rating,
-        comment,
-      });
-
-      // Save feedback to the database
+      const feedback = new FeedbackModel({ name, rating, comment });
       const savedFeedback = await feedback.save();
       return res.status(201).json(savedFeedback);
-    }
-
-    // GET - Fetch All Feedbacks
-    if (req.method === "GET") {
-      const feedbacks = await FeedbackModel.find();
+    });
+  } else if (req.method === "GET") {
+    await verifyToken(req, res, async () => {
+      const feedbacks = await FeedbackModel.find({});
       return res.status(200).json(feedbacks);
-    }
-
-    // Method not allowed
+    });
+  } else {
+    // If any other method is used
     res.status(405).json({ error: "Method not allowed" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
 };

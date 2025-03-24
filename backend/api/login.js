@@ -37,10 +37,12 @@ module.exports = async (req, res) => {
       { expiresIn: "24h" }
     );
 
+    // Return success response with user id
     res.json({
       message: "Success",
+      id: user._id, // Add user id to response
       role: user.role,
-      token,
+      token, // Return the token to the client
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

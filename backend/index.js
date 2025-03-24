@@ -5,7 +5,6 @@ const cors = require("cors");
 const jwt = require('jsonwebtoken'); // For generating JWT tokens
 const bcrypt = require("bcrypt");
 const session = require("express-session");
-const MongoStore = require("connect-mongo");
 const UserModel = require("./model/User");
 const FeedbackModel = require("./model/Feedback");
 const { verifyUser } = require("./middleware/auth");
@@ -32,14 +31,6 @@ mongoose
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log("MongoDB connection error:", err));
 
-// Session middleware
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({ mongoUrl: MONGO_URI }),
-  cookie: { secure: false } // Set to true if using HTTPS
-}));
 
 app.post("/signup", async (req, res) => {
   try {
