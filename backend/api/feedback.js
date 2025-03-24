@@ -1,6 +1,6 @@
 const FeedbackModel = require("../model/Feedback");
 const connectToDatabase = require("../db");
-const verifyUser = require("../middleware/verifyUser");
+const verifyUser = require("../middleware/auth");
 
 module.exports = async (req, res) => {
   await connectToDatabase();
@@ -15,12 +15,12 @@ module.exports = async (req, res) => {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
-      // Extract rating and comment from the request body
-      const { rating, comment } = req.body;
+      // Extract name, rating, and comment from the request body
+      const { name, rating, comment } = req.body;
 
-      // Create new feedback with the user's name
+      // Create new feedback with provided name or default to "Anonymous"
       const feedback = new FeedbackModel({
-        name: req.user.name, // Use the authenticated user's name
+        name: name || "Anonymous", // Default to Anonymous if name is not provided
         rating,
         comment,
       });
@@ -39,8 +39,8 @@ module.exports = async (req, res) => {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
-      // Fetch feedbacks submitted by the logged-in user
-      const feedbacks = await FeedbackModel.find({ name: req.user.name });
+      // Fetch all feedbacks (or filter by user if needed)
+      const feedbacks = await FeedbackModel.find();
       return res.status(200).json(feedbacks);
     }
 
